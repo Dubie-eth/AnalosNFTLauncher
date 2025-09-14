@@ -1,0 +1,25 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "backend/src/simple-server.ts",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "backend/src/simple-server.ts"
+    },
+    {
+      "src": "/health",
+      "dest": "backend/src/simple-server.ts"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production",
+    "CORS_ORIGIN": "https://launchonlos.vercel.app",
+    "RPC_URL": "https://rpc.analos.io/",
+    "EXPLORER_URL": "https://explorer.analos.io/"
+  }
+}

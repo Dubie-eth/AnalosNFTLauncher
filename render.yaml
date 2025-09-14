@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: lol-backend-api
+    env: node
+    plan: free
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npx tsx src/simple-server.ts
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: CORS_ORIGIN
+        value: https://launchonlos.vercel.app
+      - key: RPC_URL
+        value: https://rpc.analos.io/
+      - key: EXPLORER_URL
+        value: https://explorer.analos.io/

@@ -1,0 +1,10 @@
+{
+  "name": "lol-netlify-functions",
+  "version": "1.0.0",
+  "description": "Netlify functions for Launch On Los API",
+  "main": "functions/api.js",
+  "dependencies": {
+    "express": "^4.18.2",
+    "serverless-http": "^3.2.0"
+  }
+}

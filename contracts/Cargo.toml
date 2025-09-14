@@ -1,0 +1,26 @@
+[package]
+name = "analos-nft-launcher"
+version = "0.1.0"
+description = "NFT Launcher program for Analos blockchain"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "analos_nft_launcher"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+anchor-lang = { version = "0.30.0", features = ["init-if-needed"] }
+anchor-spl = "0.30.0"
+mpl-core = "0.1.0"
+mpl-token-metadata = "2.2.0"
+mpl-token-auth-rules = "0.1.0"
+solana-program = "~1.17.0"
+spl-token = "~4.0.0"
+spl-associated-token-account = "~2.2.0"

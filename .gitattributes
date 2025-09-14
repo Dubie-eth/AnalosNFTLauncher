@@ -1,0 +1,106 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Custom for Visual Studio
+*.cs     diff=csharp
+*.sln    merge=union
+*.suo    merge=union
+*.user   merge=union
+*.useros merge=union
+*.sln.docstates merge=union
+
+# Custom for Visual Studio Code
+*.code-workspace merge=union
+
+# Custom for Xcode
+*.pbxproj merge=union
+*.xib    merge=union
+*.storyboard merge=union
+
+# Custom for Android
+*.xml    merge=union
+
+# Custom for Rust
+*.rs     text
+*.toml   text
+
+# Custom for TypeScript/JavaScript
+*.ts     text
+*.tsx    text
+*.js     text
+*.jsx    text
+*.json   text
+
+# Custom for CSS
+*.css    text
+*.scss   text
+*.sass   text
+*.less   text
+
+# Custom for HTML
+*.html   text
+*.htm    text
+
+# Custom for Markdown
+*.md     text
+*.mdx    text
+
+# Custom for YAML
+*.yml    text
+*.yaml   text
+
+# Custom for Shell
+*.sh     text
+*.bash   text
+*.zsh    text
+
+# Custom for Docker
+Dockerfile* text
+*.dockerfile text
+.dockerignore text
+
+# Custom for Git
+.gitignore text
+.gitattributes text
+
+# Custom for GitHub
+.github/** text
+
+# Custom for documentation
+docs/** text
+*.txt    text
+
+# Binary files
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.gif    binary
+*.ico    binary
+*.svg    text
+*.woff   binary
+*.woff2  binary
+*.ttf    binary
+*.eot    binary
+
+# Archives
+*.zip    binary
+*.tar    binary
+*.tar.gz binary
+*.rar    binary
+*.7z     binary
+
+# Executables
+*.exe    binary
+*.dll    binary
+*.so     binary
+*.dylib  binary
+
+# LFS for large files
+*.psd    filter=lfs diff=lfs merge=lfs -text
+*.ai     filter=lfs diff=lfs merge=lfs -text
+*.sketch filter=lfs diff=lfs merge=lfs -text
+*.mp4    filter=lfs diff=lfs merge=lfs -text
+*.mov    filter=lfs diff=lfs merge=lfs -text
+*.avi    filter=lfs diff=lfs merge=lfs -text
+*.mkv    filter=lfs diff=lfs merge=lfs -text
+*.webm   filter=lfs diff=lfs merge=lfs -text
