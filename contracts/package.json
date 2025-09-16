@@ -4,11 +4,11 @@
   "description": "Anchor program for Analos NFT Launcher",
   "scripts": {
     "build": "anchor build",
-    "deploy": "anchor deploy --provider.cluster custom",
-    "test": "anchor test --provider.cluster custom",
+    "deploy": "anchor deploy --provider.cluster https://rpc.analos.io/",
+    "test": "anchor test --provider.cluster https://rpc.analos.io/",
     "clean": "anchor clean",
     "idl": "anchor idl",
-    "upgrade": "anchor upgrade --provider.cluster custom"
+    "upgrade": "anchor upgrade --provider.cluster https://rpc.analos.io/"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.30.0",
@@ -17,12 +17,10 @@
     "@metaplex-foundation/mpl-token-auth-rules": "^0.1.0"
   },
   "devDependencies": {
-    "@coral-xyz/anchor": "^0.30.0",
     "@types/bn.js": "^5.1.0",
     "@types/chai": "^4.3.0",
     "@types/mocha": "^10.0.0",
     "chai": "^4.3.0",
-    "mocha": "^10.0.0",
-    "typescript": "^5.3.0"
+    "mocha": "^10.0.0"
   }
 }

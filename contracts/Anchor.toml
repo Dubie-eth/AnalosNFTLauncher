@@ -15,7 +15,7 @@ analos_nft_launcher = "NFTLauncher1111111111111111111111111111111"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "custom"
+cluster = "https://rpc.analos.io/"
 wallet = "~/.config/solana/id.json"
 
 [scripts]

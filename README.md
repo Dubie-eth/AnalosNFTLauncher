@@ -38,6 +38,8 @@
 
 ## 🏗️ Architecture
 
+This project is a monorepo managed with **Yarn Workspaces** and **Turborepo**.
+
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Frontend      │    │   Backend       │    │   Blockchain    │
@@ -53,6 +55,13 @@
                     │   Bundlr Network│
                     └─────────────────┘
 ```
+
+### Why Turborepo?
+
+We use **Turborepo** to manage our monorepo. It provides several benefits:
+- **Faster Builds**: Turborepo caches the output of tasks, so you don't have to re-run them if the code hasn't changed.
+- **Parallel Execution**: It can run tasks in parallel, which significantly speeds up the development workflow.
+- **Simplified Scripts**: It simplifies the scripts in our `package.json` files, making them easier to manage.
 
 ## 🚀 Quick Start
 
@@ -130,24 +139,18 @@ AnalosNFTLauncher/
 
 ### Available Scripts
 
+All scripts are run from the root of the project.
+
 ```bash
 # Development
 yarn dev                    # Start all development servers
-yarn dev:frontend          # Start frontend only
-yarn dev:backend           # Start backend only
-yarn dev:contracts         # Build contracts
 
 # Building
 yarn build                 # Build all packages
-yarn build:frontend        # Build frontend
-yarn build:backend         # Build backend
-yarn build:contracts       # Build contracts
 
 # Testing
 yarn test                  # Run all tests
-yarn test:frontend         # Test frontend
-yarn test:backend          # Test backend
-yarn test:contracts        # Test contracts
+yarn test:watch            # Run tests in watch mode
 
 # Linting
 yarn lint                  # Lint all packages
@@ -190,23 +193,17 @@ ENCRYPTION_KEY=your_32_character_encryption_key_here
 # Run all tests
 yarn test
 
-# Run specific test suites
-yarn test:frontend
-yarn test:backend
-yarn test:contracts
-
 # Run tests in watch mode
 yarn test:watch
 ```
 
 ### Test Coverage
 
-```bash
-# Generate coverage report
-yarn test:coverage
+To generate a coverage report, you can run the test command with the `--coverage` flag in the specific workspace. For example:
 
-# View coverage in browser
-open coverage/lcov-report/index.html
+```bash
+# Generate coverage report for the frontend
+yarn workspace @analos-nft-launcher/frontend test --coverage
 ```
 
 ## 🚀 Deployment
@@ -216,7 +213,7 @@ open coverage/lcov-report/index.html
 1. **Connect to Vercel**
    - Go to [Vercel.com](https://vercel.com)
    - Import your GitHub repository
-   - Set build command: `yarn build:frontend`
+   - Set build command: `yarn build`
    - Set output directory: `frontend/.next`
 
 2. **Environment Variables**
@@ -232,14 +229,14 @@ open coverage/lcov-report/index.html
 1. **Railway Deployment**
    - Go to [Railway.app](https://railway.app)
    - Connect your GitHub repository
-   - Set start command: `yarn start:backend`
+   - Set start command: `yarn start`
    - Add environment variables
 
 2. **Render Deployment**
    - Go to [Render.com](https://render.com)
    - Create new Web Service
-   - Set build command: `yarn build:backend`
-   - Set start command: `yarn start:backend`
+   - Set build command: `yarn build`
+   - Set start command: `yarn start`
 
 ### Smart Contracts (Analos)
 
