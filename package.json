@@ -1,90 +1,14 @@
 {
   "name": "analos-nft-launcher",
   "version": "0.1.0",
-  "description": "🚀 Launch On Los (LOL) - No-code NFT launchpad for Analos blockchain. Create, mint, and trade NFTs with ease.",
+  "description": "🚀 Launch On Los (LOL) - No-code NFT launchpad for Analos blockchain",
   "private": true,
-  "workspaces": [
-    "contracts",
-    "backend", 
-    "frontend",
-    "shared"
-  ],
-  "engines": {
-    "node": ">=18.0.0",
-    "yarn": ">=1.22.0"
-  },
   "scripts": {
-    "install:all": "yarn install",
-    "dev": "concurrently \"yarn dev:backend\" \"yarn dev:frontend\"",
-    "dev:frontend": "yarn workspace @analos-nft-launcher/frontend dev",
-    "dev:backend": "yarn workspace @analos-nft-launcher/backend dev",
-    "dev:contracts": "yarn workspace @analos-nft-launcher/contracts build",
-    "build": "yarn build:all",
-    "build:all": "yarn build:shared && yarn build:backend && yarn build:frontend && yarn build:contracts",
-    "build:shared": "yarn workspace @analos-nft-launcher/shared build",
-    "build:backend": "yarn workspace @analos-nft-launcher/backend build",
-    "build:frontend": "yarn workspace @analos-nft-launcher/frontend build",
-    "build:contracts": "yarn workspace @analos-nft-launcher/contracts build",
-    "start": "concurrently \"yarn start:backend\" \"yarn start:frontend\"",
-    "start:backend": "yarn workspace @analos-nft-launcher/backend start",
-    "start:frontend": "yarn workspace @analos-nft-launcher/frontend start",
-    "test": "yarn test:all",
-    "test:all": "yarn test:backend && yarn test:frontend && yarn test:contracts",
-    "test:backend": "yarn workspace @analos-nft-launcher/backend test",
-    "test:frontend": "yarn workspace @analos-nft-launcher/frontend test",
-    "test:contracts": "yarn workspace @analos-nft-launcher/contracts test",
-    "lint": "yarn lint:all",
-    "lint:all": "yarn lint:backend && yarn lint:frontend && yarn lint:contracts",
-    "lint:backend": "yarn workspace @analos-nft-launcher/backend lint",
-    "lint:frontend": "yarn workspace @analos-nft-launcher/frontend lint",
-    "lint:contracts": "yarn workspace @analos-nft-launcher/contracts lint",
-    "lint:fix": "yarn lint:fix:backend && yarn lint:fix:frontend && yarn lint:fix:contracts",
-    "lint:fix:backend": "yarn workspace @analos-nft-launcher/backend lint:fix",
-    "lint:fix:frontend": "yarn workspace @analos-nft-launcher/frontend lint:fix",
-    "lint:fix:contracts": "yarn workspace @analos-nft-launcher/contracts lint:fix",
-    "type-check": "yarn type-check:all",
-    "type-check:all": "yarn type-check:backend && yarn type-check:frontend && yarn type-check:contracts",
-    "type-check:backend": "yarn workspace @analos-nft-launcher/backend type-check",
-    "type-check:frontend": "yarn workspace @analos-nft-launcher/frontend type-check",
-    "type-check:contracts": "yarn workspace @analos-nft-launcher/contracts type-check",
-    "prettier": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
-    "prettier:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
-    "clean": "yarn clean:all",
-    "clean:all": "yarn clean:backend && yarn clean:frontend && yarn clean:contracts",
-    "clean:backend": "yarn workspace @analos-nft-launcher/backend clean",
-    "clean:frontend": "yarn workspace @analos-nft-launcher/frontend clean",
-    "clean:contracts": "yarn workspace @analos-nft-launcher/contracts clean",
-    "deploy:contracts": "yarn workspace @analos-nft-launcher/contracts deploy",
-    "deploy:backend": "yarn workspace @analos-nft-launcher/backend deploy",
-    "deploy:frontend": "yarn workspace @analos-nft-launcher/frontend deploy",
-    "release": "standard-version",
-    "release:dry": "standard-version --dry-run"
+    "build": "cd backend && npm install",
+    "start": "cd backend && npx tsx src/simple-server.ts"
   },
-  "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^6.0.0",
-    "@typescript-eslint/parser": "^6.0.0",
-    "concurrently": "^8.2.2",
-    "eslint": "^8.56.0",
-    "eslint-config-next": "^14.0.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-prettier": "^5.1.3",
-    "lint-staged": "^15.0.0",
-    "prettier": "^3.2.5",
-    "standard-version": "^9.5.0",
-    "typescript": "^5.3.3"
-  },
-  "lint-staged": {
-    "*.{ts,tsx,js,jsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{json,md}": [
-      "prettier --write"
-    ]
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Dubie-eth/AnalosNFTLauncher.git"
+  "engines": {
+    "node": ">=18.0.0"
   },
   "keywords": [
     "nft",
@@ -94,18 +18,8 @@
     "blockchain",
     "crypto",
     "defi",
-    "web3",
-    "metaplex",
-    "anchor"
+    "web3"
   ],
-  "author": {
-    "name": "Dubie-eth",
-    "email": "dubie@example.com",
-    "url": "https://github.com/Dubie-eth"
-  },
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/Dubie-eth/AnalosNFTLauncher/issues"
-  },
-  "homepage": "https://github.com/Dubie-eth/AnalosNFTLauncher#readme"
+  "author": "Dubie-eth",
+  "license": "MIT"
 }
