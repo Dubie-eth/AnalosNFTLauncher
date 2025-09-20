@@ -12,7 +12,7 @@ services:
       - key: PORT
         value: 10000
       - key: CORS_ORIGIN
-        value: https://launchonlos.vercel.app
+        value: https://launchonlos.fun
       - key: RPC_URL
         value: https://rpc.analos.io/
       - key: EXPLORER_URL

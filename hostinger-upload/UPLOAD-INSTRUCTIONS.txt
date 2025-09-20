@@ -1,0 +1,13 @@
+# Hostinger Upload Instructions 
+ 
+1. Login to your Hostinger control panel 
+2. Go to File Manager 
+3. Navigate to public_html folder 
+4. Delete all existing files in public_html 
+5. Upload index.html to public_html 
+6. Set index.html as your default page 
+7. Enable SSL certificate in Hostinger panel 
+ 
+Your site will be available at: https://launchonlos.fun 
+ 
+Backend API: https://lol-backend-api.onrender.com 
