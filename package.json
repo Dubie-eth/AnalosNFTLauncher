@@ -5,7 +5,9 @@
   "private": true,
   "scripts": {
     "build": "cd backend && npm install && cd backend && npm run build",
-    "start": "cd backend && node dist/simple-server.js"
+    "start": "cd backend && node dist/simple-server.js",
+    "render-build": "cd backend && npm install && cd backend && npm run build",
+    "render-start": "cd backend && node dist/simple-server.js"
   },
   "engines": {
     "node": ">=18.0.0"
