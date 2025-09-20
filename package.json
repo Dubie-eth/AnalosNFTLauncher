@@ -4,6 +4,7 @@
   "description": "🚀 Launch On Los (LOL) - No-code NFT launchpad for Analos blockchain",
   "private": true,
   "scripts": {
+    "bu": "cd backend && npm install",
     "build": "cd backend && npm install",
     "start": "cd backend && node simple-server.js"
   },
