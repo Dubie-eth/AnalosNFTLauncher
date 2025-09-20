@@ -3,8 +3,8 @@ services:
     name: lol-backend-api
     env: node
     plan: free
-    buildCommand: npm run render-build
-    startCommand: npm run render-start
+    buildCommand: cd backend && npm install && npm run build
+    startCommand: cd backend && node dist/simple-server.js
     healthCheckPath: /health
     envVars:
       - key: NODE_ENV
