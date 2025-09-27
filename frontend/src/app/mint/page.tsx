@@ -40,10 +40,8 @@ export default function MintPage() {
   const [isMinting, setIsMinting] = useState(false);
   const [mintResult, setMintResult] = useState<MintResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [nftName, setNftName] = useState('Test Analos NFT');
-  const [nftDescription, setNftDescription] = useState('A test NFT minted on the Analos blockchain');
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [nftName, setNftName] = useState('Analos NFT');
+  const [nftDescription, setNftDescription] = useState('A unique NFT minted on the Analos blockchain');
   const [mintStatus, setMintStatus] = useState<MintStatus | null>(null);
   const [isCheckingMintStatus, setIsCheckingMintStatus] = useState(false);
 
@@ -51,6 +49,9 @@ export default function MintPage() {
     // Use a more reliable image service
     return `https://picsum.photos/500/500?random=${Date.now()}`;
   };
+
+  // Fixed collection image - no user uploads
+  const collectionImage = generateRandomImage();
 
   const checkMintStatus = async (walletAddress: string) => {
     setIsCheckingMintStatus(true);
@@ -78,39 +79,7 @@ export default function MintPage() {
     }
   }, [connected, publicKey]);
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    // Validate file type
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
-    if (!allowedTypes.includes(file.type)) {
-      setError('Please upload a valid image file (JPEG, PNG, GIF, or WebP)');
-      return;
-    }
-
-    // Validate file size (max 5MB for cost efficiency)
-    const maxSize = 5 * 1024 * 1024; // 5MB
-    if (file.size > maxSize) {
-      setError('Image size must be less than 5MB for cost efficiency');
-      return;
-    }
-
-    setSelectedImage(file);
-    setError(null);
-
-    // Create preview
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setImagePreview(e.target?.result as string);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const removeImage = () => {
-    setSelectedImage(null);
-    setImagePreview(null);
-  };
+  // No image upload functionality - using fixed collection image
 
   const handleMint = async () => {
     if (!connected || !publicKey) {
@@ -128,23 +97,21 @@ export default function MintPage() {
     setMintResult(null);
 
     try {
-      // Create FormData for file upload
-      const formData = new FormData();
-      formData.append('name', nftName.trim());
-      formData.append('description', nftDescription.trim());
-      formData.append('walletAddress', publicKey.toString());
-      
-      if (selectedImage) {
-        formData.append('image', selectedImage);
-      } else {
-        // Use random image if no file selected
-        formData.append('imageUrl', generateRandomImage());
-      }
+            // Create JSON payload (no file upload)
+            const payload = {
+              name: nftName.trim(),
+              description: nftDescription.trim(),
+              walletAddress: publicKey.toString(),
+              imageUrl: collectionImage // Use fixed collection image
+            };
 
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
       const response = await fetch(`${backendUrl}/api/mint`, {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
@@ -159,10 +126,6 @@ export default function MintPage() {
               if (publicKey) {
                 checkMintStatus(publicKey.toString());
               }
-              
-              // Clear the form after successful minting
-              setSelectedImage(null);
-              setImagePreview(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to mint NFT');
     } finally {
@@ -249,14 +212,14 @@ export default function MintPage() {
                     )}
                   </div>
 
-          {/* NFT Form */}
+          {/* Collection Display */}
           <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-6">
             <h2 className="text-xl font-semibold text-white mb-6">
-              🎨 Create Your NFT
+              🎨 Collection NFT
             </h2>
             
             <div className="grid md:grid-cols-2 gap-6">
-              {/* Left Column - Basic Info */}
+              {/* Left Column - Collection Info */}
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -286,56 +249,28 @@ export default function MintPage() {
                 </div>
               </div>
 
-              {/* Right Column - Image Upload */}
+              {/* Right Column - Collection Image */}
               <div className="space-y-4">
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  NFT Image
+                  Collection Image
                 </label>
                 
-                {/* Upload Area */}
-                {!imagePreview ? (
-                  <div className="flex items-center justify-center w-full">
-                    <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-white/30 rounded-lg cursor-pointer bg-white/10 hover:bg-white/20 transition-colors">
-                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                        <svg className="w-10 h-10 mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                        </svg>
-                        <p className="mb-2 text-sm text-gray-300">
-                          <span className="font-semibold">Upload Image</span>
-                        </p>
-                        <p className="text-xs text-gray-400 text-center">
-                          PNG, JPG, GIF, WebP<br/>
-                          Max 5MB for cost efficiency
-                        </p>
-                      </div>
-                      <input 
-                        type="file" 
-                        className="hidden" 
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                      />
-                    </label>
+                {/* Fixed Collection Image */}
+                <div className="relative">
+                  <img
+                    src={collectionImage}
+                    alt="Collection NFT"
+                    className="w-full h-48 object-cover rounded-lg"
+                  />
+                  <div className="absolute top-2 right-2 bg-purple-600 text-white px-2 py-1 rounded text-xs">
+                    Collection NFT
                   </div>
-                ) : (
-                  <div className="relative">
-                    <img
-                      src={imagePreview}
-                      alt="Preview"
-                      className="w-full h-40 object-cover rounded-lg"
-                    />
-                    <button
-                      onClick={removeImage}
-                      className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm hover:bg-red-600 transition-colors"
-                    >
-                      ×
-                    </button>
-                  </div>
-                )}
+                </div>
 
-                {/* Cost Info */}
-                <div className="bg-green-500/20 border border-green-500/50 rounded-lg p-3">
-                  <p className="text-green-200 text-sm">
-                    💰 <strong>Cost Efficient:</strong> Small images = Lower minting fees
+                {/* Collection Info */}
+                <div className="bg-blue-500/20 border border-blue-500/50 rounded-lg p-3">
+                  <p className="text-blue-200 text-sm">
+                    🎨 <strong>Collection NFT:</strong> This is a pre-generated collection image
                   </p>
                 </div>
               </div>
@@ -361,7 +296,7 @@ export default function MintPage() {
                       ) : (
                         <div className="flex items-center justify-center">
                           <span className="mr-2">🚀</span>
-                          {selectedImage ? 'Mint NFT (100 $LOS)' : 'Mint Random NFT (100 $LOS)'}
+                          Mint Collection NFT (100 $LOS)
                         </div>
                       )}
             </button>
@@ -435,13 +370,13 @@ export default function MintPage() {
                 </div>
               </div>
 
-              <div className="mt-4">
-                <img
-                  src={selectedImage ? (imagePreview || mintResult.nft.image) : mintResult.nft.image}
-                  alt={mintResult.nft.name}
-                  className="w-32 h-32 rounded-lg mx-auto object-cover"
-                />
-              </div>
+                      <div className="mt-4">
+                        <img
+                          src={mintResult.nft.image}
+                          alt={mintResult.nft.name}
+                          className="w-32 h-32 rounded-lg mx-auto object-cover"
+                        />
+                      </div>
             </div>
           )}
 

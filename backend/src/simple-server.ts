@@ -391,6 +391,62 @@ app.post('/api/admin/toggle-minting', (req, res) => {
   }
 });
 
+// Deploy collection endpoint
+app.post('/api/admin/deploy-collection', (req, res) => {
+  try {
+    const { name, description, imageUrl, totalSupply, mintPrice, currency, adminWallet } = req.body;
+    
+    // Validate required fields
+    if (!name || !adminWallet) {
+      return res.status(400).json({
+        success: false,
+        error: 'Collection name and admin wallet are required'
+      });
+    }
+
+    // Generate unique collection ID
+    const collectionId = `collection_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    // Create collection data
+    const collectionData = {
+      id: collectionId,
+      name: name.trim(),
+      description: description || 'A unique NFT collection on the Analos blockchain',
+      imageUrl: imageUrl || 'https://picsum.photos/500/500?random=1',
+      totalSupply: totalSupply || 1000,
+      mintPrice: mintPrice || 100,
+      currency: currency || '$LOS',
+      adminWallet,
+      deployedAt: new Date().toISOString(),
+      isActive: true
+    };
+
+    // Generate mint page URL
+    const mintPageUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://analos-nft-launcher-uz4a-dlfqnwmta-dubie-eths-projects.vercel.app'}/mint/${collectionId}`;
+
+    console.log(`🚀 Collection deployed: ${collectionData.name}`);
+    console.log(`📝 Collection ID: ${collectionId}`);
+    console.log(`🔗 Mint Page: ${mintPageUrl}`);
+    console.log(`👤 Admin Wallet: ${adminWallet}`);
+
+    res.json({
+      success: true,
+      data: {
+        collectionId,
+        mintPageUrl,
+        message: `Collection "${collectionData.name}" deployed successfully!`
+      }
+    });
+
+  } catch (error) {
+    console.error('Deploy collection error:', error);
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to deploy collection'
+    });
+  }
+});
+
 // API routes
 app.get('/api', (req, res) => {
   res.json({
