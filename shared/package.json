@@ -2,6 +2,7 @@
   "name": "@analos-nft-launcher/shared",
   "version": "1.0.0",
   "description": "Shared types and utilities for Analos NFT Launcher",
+  "private": true,
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {

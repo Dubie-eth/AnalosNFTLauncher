@@ -2,6 +2,7 @@
   "name": "@analos-nft-launcher/contracts",
   "version": "1.0.0",
   "description": "Anchor program for Analos NFT Launcher",
+  "private": true,
   "scripts": {
     "build": "anchor build",
     "deploy": "anchor deploy --provider.cluster custom",

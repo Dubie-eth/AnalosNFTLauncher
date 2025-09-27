@@ -4,6 +4,14 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export function validateEnv() {
+  // For development, we'll use default values if env vars are missing
+  const isDevelopment = process.env.NODE_ENV !== 'production';
+  
+  if (isDevelopment) {
+    console.log('🔧 Development mode: Using default environment values');
+    return;
+  }
+
   const requiredEnvVars = [
     'RPC_URL',
     'EXPLORER_URL',
@@ -50,13 +58,13 @@ export function validateEnv() {
 
 export const config = {
   // Blockchain configuration
-  rpcUrl: process.env.RPC_URL!,
-  explorerUrl: process.env.EXPLORER_URL!,
+  rpcUrl: process.env.RPC_URL || 'https://rpc.analos.io/',
+  explorerUrl: process.env.EXPLORER_URL || 'https://explorer.analos.io/',
   chainId: process.env.CHAIN_ID || 'analos',
   
   // Wallet configuration
-  walletPrivateKey: process.env.WALLET_PRIVATE_KEY!,
-  feeWallet: process.env.FEE_WALLET!,
+  walletPrivateKey: process.env.WALLET_PRIVATE_KEY || 'mock_private_key_for_development',
+  feeWallet: process.env.FEE_WALLET || 'mock_fee_wallet_for_development',
   
   // Storage configuration
   bundlrNetworkUrl: process.env.BUNDLR_NETWORK_URL || 'https://node1.bundlr.network',

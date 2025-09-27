@@ -266,17 +266,21 @@ export function isValidFileSize(file: File, maxSizeBytes: number): boolean {
 }
 
 /**
- * Convert file to base64
+ * Convert file to base64 (browser only)
  */
 export function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
+    if (typeof FileReader === 'undefined') {
+      reject(new Error('FileReader not available in this environment'));
+      return;
+    }
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = () => {
       const result = reader.result as string;
       resolve(result.split(',')[1]); // Remove data:image/...;base64, prefix
     };
-    reader.onerror = error => reject(error);
+    reader.onerror = (error: any) => reject(error);
   });
 }
 

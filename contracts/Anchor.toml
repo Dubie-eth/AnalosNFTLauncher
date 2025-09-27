@@ -15,8 +15,11 @@ analos_nft_launcher = "NFTLauncher1111111111111111111111111111111"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "custom"
+cluster = "analos"
 wallet = "~/.config/solana/id.json"
+
+[programs.analos]
+analos_nft_launcher = "NFTLauncher1111111111111111111111111111111"
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"

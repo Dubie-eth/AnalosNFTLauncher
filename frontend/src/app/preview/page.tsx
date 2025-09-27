@@ -102,8 +102,8 @@ export default function PreviewPage() {
   const handleCancel = () => {
     if (collectionData) {
       setFormData({
-        name: collectionData.collectionName || collectionData.name || '',
-        symbol: collectionData.collectionSymbol || collectionData.symbol || '',
+        name: collectionData.collectionName || '',
+        symbol: collectionData.collectionSymbol || '',
         description: collectionData.description || '',
         totalSupply: collectionData.totalSupply || 0
       });
@@ -176,13 +176,13 @@ export default function PreviewPage() {
           <div className="collection-image">
             <img 
               src={collectionData.image || 'https://via.placeholder.com/300x300/667eea/ffffff?text=Collection+Image'} 
-              alt={collectionData.collectionName || collectionData.name}
+              alt={collectionData.collectionName}
               style={{ width: '100%', height: '300px', objectFit: 'cover', borderRadius: '12px' }}
             />
           </div>
           <div className="collection-info">
-            <h2>{collectionData.collectionName || collectionData.name}</h2>
-            <p className="collection-symbol">#{collectionData.collectionSymbol || collectionData.symbol}</p>
+            <h2>{collectionData.collectionName}</h2>
+            <p className="collection-symbol">#{collectionData.collectionSymbol}</p>
             <p className="collection-description">{collectionData.description}</p>
             
             <div className="collection-stats">

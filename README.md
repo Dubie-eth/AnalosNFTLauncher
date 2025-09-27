@@ -61,7 +61,14 @@
 - **Node.js** 18.0.0 or higher
 - **Yarn** 1.22.0 or higher
 - **Git** for version control
-- **Analos wallet** with SOL for testing
+- **Anchor CLI** for smart contract development
+- **Solana CLI** for blockchain interaction
+- **Analos wallet** with test tokens ready
+
+### Analos Network Details
+- **RPC URL**: https://rpc.analos.io
+- **Explorer**: https://explorer.analos.io
+- **Chain ID**: analos
 
 ### Installation
 
@@ -90,6 +97,39 @@
 5. **Open your browser**
    - Frontend: http://localhost:3000
    - Backend API: http://localhost:3001
+
+## 🎯 Mint Test NFT
+
+### Quick Test Flow
+
+1. **Start the development servers**
+   ```bash
+   # Terminal 1: Backend
+   cd backend && yarn dev
+   
+   # Terminal 2: Frontend  
+   cd frontend && yarn dev
+   ```
+
+2. **Deploy contracts to Analos**
+   ```bash
+   cd contracts
+   anchor build
+   anchor deploy --provider.cluster analos
+   ```
+
+3. **Test the mint flow**
+   - Open http://localhost:3000/mint
+   - Connect your Analos wallet (Phantom/Solflare)
+   - Click "Mint Random NFT"
+   - Confirm transaction in wallet
+   - View NFT on https://explorer.analos.io
+
+### Troubleshooting
+
+- **RPC Connection Issues**: Ensure `RPC_URL=https://rpc.analos.io/` in your `.env`
+- **Wallet Connection**: Make sure your wallet is set to Analos network
+- **Deployment Fails**: Run `solana config set --url https://rpc.analos.io` first
 
 ## 📁 Project Structure
 
