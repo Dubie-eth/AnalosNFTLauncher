@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 
@@ -22,6 +22,14 @@ interface MintResult {
   };
 }
 
+interface WhitelistStatus {
+  isWhitelisted: boolean;
+  canMint: boolean;
+  mintedCount: number;
+  maxMints: number;
+  remainingMints: number;
+}
+
 export default function MintPage() {
   const { publicKey, connected } = useWallet();
   const [isMinting, setIsMinting] = useState(false);
@@ -31,11 +39,39 @@ export default function MintPage() {
   const [nftDescription, setNftDescription] = useState('A test NFT minted on the Analos blockchain');
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [whitelistStatus, setWhitelistStatus] = useState<WhitelistStatus | null>(null);
+  const [isCheckingWhitelist, setIsCheckingWhitelist] = useState(false);
 
   const generateRandomImage = () => {
     // Use a more reliable image service
     return `https://picsum.photos/500/500?random=${Date.now()}`;
   };
+
+  const checkWhitelistStatus = async (walletAddress: string) => {
+    setIsCheckingWhitelist(true);
+    try {
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+      const response = await fetch(`${backendUrl}/api/whitelist/${walletAddress}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        setWhitelistStatus(data.data);
+      } else {
+        console.error('Failed to check whitelist status:', data.error);
+      }
+    } catch (error) {
+      console.error('Error checking whitelist status:', error);
+    } finally {
+      setIsCheckingWhitelist(false);
+    }
+  };
+
+  // Check whitelist status when wallet connects
+  React.useEffect(() => {
+    if (connected && publicKey) {
+      checkWhitelistStatus(publicKey.toString());
+    }
+  }, [connected, publicKey]);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -112,11 +148,16 @@ export default function MintPage() {
         throw new Error(data.error || 'Failed to mint NFT');
       }
 
-      setMintResult(data.data);
-      
-      // Clear the form after successful minting
-      setSelectedImage(null);
-      setImagePreview(null);
+              setMintResult(data.data);
+              
+              // Refresh whitelist status after successful minting
+              if (publicKey) {
+                checkWhitelistStatus(publicKey.toString());
+              }
+              
+              // Clear the form after successful minting
+              setSelectedImage(null);
+              setImagePreview(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to mint NFT');
     } finally {
@@ -138,20 +179,54 @@ export default function MintPage() {
             </p>
           </div>
 
-          {/* Wallet Connection */}
-          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-semibold text-white mb-2">
-                  Connect Wallet
-                </h2>
-                <p className="text-gray-300">
-                  Connect your wallet to mint NFTs on Analos
-                </p>
-              </div>
-              <WalletMultiButton className="!bg-purple-600 hover:!bg-purple-700 !rounded-lg" />
-            </div>
-          </div>
+                  {/* Wallet Connection */}
+                  <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h2 className="text-xl font-semibold text-white mb-2">
+                          Connect Wallet
+                        </h2>
+                        <p className="text-gray-300">
+                          Connect your wallet to mint NFTs on Analos
+                        </p>
+                      </div>
+                      <WalletMultiButton className="!bg-purple-600 hover:!bg-purple-700 !rounded-lg" />
+                    </div>
+                    
+                    {/* Whitelist Status */}
+                    {connected && publicKey && (
+                      <div className="mt-4 p-4 bg-white/5 rounded-lg">
+                        {isCheckingWhitelist ? (
+                          <div className="flex items-center text-gray-300">
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                            Checking whitelist status...
+                          </div>
+                        ) : whitelistStatus ? (
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="text-gray-300">Whitelist Status:</span>
+                              <span className={`font-semibold ${whitelistStatus.isWhitelisted ? 'text-green-400' : 'text-red-400'}`}>
+                                {whitelistStatus.isWhitelisted ? '✅ Whitelisted' : '❌ Not Whitelisted'}
+                              </span>
+                            </div>
+                            {whitelistStatus.isWhitelisted && (
+                              <div className="flex items-center justify-between">
+                                <span className="text-gray-300">Mints Remaining:</span>
+                                <span className="text-blue-400 font-semibold">
+                                  {whitelistStatus.remainingMints} / {whitelistStatus.maxMints}
+                                </span>
+                              </div>
+                            )}
+                            {!whitelistStatus.canMint && whitelistStatus.isWhitelisted && (
+                              <div className="text-yellow-400 text-sm">
+                                ⚠️ You've reached the maximum mint limit for this collection
+                              </div>
+                            )}
+                          </div>
+                        ) : null}
+                      </div>
+                    )}
+                  </div>
 
           {/* NFT Form */}
           <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-6">
@@ -248,15 +323,15 @@ export default function MintPage() {
 
           {/* Mint Button */}
           <div className="text-center mb-6">
-            <button
-              onClick={handleMint}
-              disabled={!connected || isMinting || !nftName.trim()}
-              className={`px-12 py-4 rounded-xl font-bold text-xl transition-all duration-200 transform ${
-                connected && !isMinting && nftName.trim()
-                  ? 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl hover:scale-105'
-                  : 'bg-gray-600 text-gray-400 cursor-not-allowed'
-              }`}
-            >
+                    <button
+                      onClick={handleMint}
+                      disabled={!connected || isMinting || !nftName.trim() || (whitelistStatus && !whitelistStatus.canMint)}
+                      className={`px-12 py-4 rounded-xl font-bold text-xl transition-all duration-200 transform ${
+                        connected && !isMinting && nftName.trim() && (!whitelistStatus || whitelistStatus.canMint)
+                          ? 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl hover:scale-105'
+                          : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                      }`}
+                    >
               {isMinting ? (
                 <div className="flex items-center justify-center">
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-3"></div>

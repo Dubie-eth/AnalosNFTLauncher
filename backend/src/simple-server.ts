@@ -113,6 +113,58 @@ class AnalosBlockchainService {
 // Initialize blockchain service
 const blockchainService = new AnalosBlockchainService();
 
+// Whitelist system for first collection
+class WhitelistService {
+  private whitelist: Set<string> = new Set();
+  private mintedCount: Map<string, number> = new Map();
+  private maxMintsPerWallet = 3; // Max 3 NFTs per wallet for whitelist
+
+  addToWhitelist(walletAddress: string) {
+    this.whitelist.add(walletAddress);
+    console.log(`✅ Added ${walletAddress} to whitelist`);
+  }
+
+  isWhitelisted(walletAddress: string): boolean {
+    return this.whitelist.has(walletAddress);
+  }
+
+  canMint(walletAddress: string): boolean {
+    if (!this.isWhitelisted(walletAddress)) {
+      return false;
+    }
+    
+    const minted = this.mintedCount.get(walletAddress) || 0;
+    return minted < this.maxMintsPerWallet;
+  }
+
+  recordMint(walletAddress: string) {
+    const current = this.mintedCount.get(walletAddress) || 0;
+    this.mintedCount.set(walletAddress, current + 1);
+    console.log(`🎨 ${walletAddress} minted NFT #${current + 1}`);
+  }
+
+  getMintCount(walletAddress: string): number {
+    return this.mintedCount.get(walletAddress) || 0;
+  }
+
+  getWhitelistStatus(walletAddress: string) {
+    return {
+      isWhitelisted: this.isWhitelisted(walletAddress),
+      canMint: this.canMint(walletAddress),
+      mintedCount: this.getMintCount(walletAddress),
+      maxMints: this.maxMintsPerWallet,
+      remainingMints: Math.max(0, this.maxMintsPerWallet - this.getMintCount(walletAddress))
+    };
+  }
+}
+
+// Initialize whitelist service
+const whitelistService = new WhitelistService();
+
+// Add some test wallets to whitelist (in production, this would be from a database)
+whitelistService.addToWhitelist('11111111111111111111111111111112'); // Test wallet
+whitelistService.addToWhitelist('22222222222222222222222222222222'); // Test wallet
+
 // Configure multer for file uploads
 const upload = multer({
   dest: 'uploads/',
@@ -246,6 +298,30 @@ app.get('/api/network', async (req, res) => {
   }
 });
 
+// Whitelist status endpoint
+app.get('/api/whitelist/:walletAddress', (req, res) => {
+  try {
+    const { walletAddress } = req.params;
+    if (!walletAddress) {
+      return res.status(400).json({
+        success: false,
+        error: 'Wallet address is required'
+      });
+    }
+
+    const whitelistStatus = whitelistService.getWhitelistStatus(walletAddress);
+    res.json({
+      success: true,
+      data: whitelistStatus
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to get whitelist status'
+    });
+  }
+});
+
 // API routes
 app.get('/api', (req, res) => {
   res.json({
@@ -320,13 +396,25 @@ app.post('/api/mint', upload.single('image'), async (req, res) => {
     const walletAddress = req.body.walletAddress;
     const uploadedFile = req.file;
 
-    // Validate required fields
-    if (!name || !walletAddress) {
-      return res.status(400).json({
-        success: false,
-        error: 'Missing required fields: name and walletAddress are required'
-      });
-    }
+            // Validate required fields
+            if (!name || !walletAddress) {
+              return res.status(400).json({
+                success: false,
+                error: 'Missing required fields: name and walletAddress are required'
+              });
+            }
+
+            // Check whitelist status
+            const whitelistStatus = whitelistService.getWhitelistStatus(walletAddress);
+            if (!whitelistStatus.canMint) {
+              return res.status(403).json({
+                success: false,
+                error: whitelistStatus.isWhitelisted 
+                  ? `You have reached the maximum mint limit (${whitelistStatus.maxMints} NFTs per wallet)`
+                  : 'Wallet not whitelisted for this collection',
+                whitelistStatus
+              });
+            }
 
     // Use default values if not provided
     const nftName = name || 'Test Analos NFT';
@@ -372,13 +460,16 @@ app.post('/api/mint', upload.single('image'), async (req, res) => {
             const explorerUrl = blockchainResult.explorerUrl;
             const estimatedCost = blockchainResult.estimatedCost;
 
-    console.log(`NFT minted successfully!`);
-    console.log(`Mint Address: ${mintAddress}`);
-    console.log(`Metadata URI: ${metadataUri}`);
-    console.log(`Transaction: ${explorerUrl}`);
-    console.log(`Estimated Cost: ${estimatedCost} ANALOS`);
+            // Record the mint in whitelist system
+            whitelistService.recordMint(walletAddress);
 
-    res.json({
+            console.log(`NFT minted successfully!`);
+            console.log(`Mint Address: ${mintAddress}`);
+            console.log(`Metadata URI: ${metadataUri}`);
+            console.log(`Transaction: ${explorerUrl}`);
+            console.log(`Estimated Cost: ${estimatedCost} ANALOS`);
+
+            res.json({
       success: true,
       data: {
         mintAddress,
