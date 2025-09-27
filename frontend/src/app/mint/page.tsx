@@ -281,9 +281,9 @@ export default function MintPage() {
           <div className="text-center mb-6">
                     <button
                       onClick={handleMint}
-                      disabled={!connected || isMinting || !nftName.trim() || (mintStatus && !mintStatus.canMint)}
+                      disabled={!connected || isMinting || !nftName.trim() || (mintStatus ? !mintStatus.canMint : false)}
                       className={`px-12 py-4 rounded-xl font-bold text-xl transition-all duration-200 transform ${
-                        connected && !isMinting && nftName.trim() && (!mintStatus || mintStatus.canMint)
+                        connected && !isMinting && nftName.trim() && (mintStatus ? mintStatus.canMint : true)
                           ? 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl hover:scale-105'
                           : 'bg-gray-600 text-gray-400 cursor-not-allowed'
                       }`}
