@@ -24,13 +24,14 @@ interface MintResult {
 }
 
 interface MintStatus {
-  isPublicMint: boolean;
+  isOpenMint: boolean;
   canMint: boolean;
   mintedCount: number;
-  maxMints: number;
-  remainingMints: number;
+  totalMinted: number;
   mintPrice: number;
   currency: string;
+  isMintingActive: boolean;
+  mintStartTime: string;
 }
 
 export default function MintPage() {
@@ -196,7 +197,7 @@ export default function MintPage() {
                       <WalletMultiButton className="!bg-purple-600 hover:!bg-purple-700 !rounded-lg" />
                     </div>
                     
-                    {/* Public Mint Status */}
+                    {/* Open Mint Status */}
                     {connected && publicKey && (
                       <div className="mt-4 p-4 bg-white/5 rounded-lg">
                         {isCheckingMintStatus ? (
@@ -213,14 +214,26 @@ export default function MintPage() {
                               </span>
                             </div>
                             <div className="flex items-center justify-between">
-                              <span className="text-gray-300">Mints Remaining:</span>
+                              <span className="text-gray-300">Your Mints:</span>
                               <span className="text-blue-400 font-semibold">
-                                {mintStatus.remainingMints} / {mintStatus.maxMints}
+                                {mintStatus.mintedCount}
                               </span>
                             </div>
-                            {!mintStatus.canMint && (
-                              <div className="text-yellow-400 text-sm">
-                                ⚠️ You've reached the maximum mint limit ({mintStatus.maxMints} NFTs per wallet)
+                            <div className="flex items-center justify-between">
+                              <span className="text-gray-300">Total Minted:</span>
+                              <span className="text-purple-400 font-semibold">
+                                {mintStatus.totalMinted}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-gray-300">Status:</span>
+                              <span className={`font-semibold ${mintStatus.isMintingActive ? 'text-green-400' : 'text-red-400'}`}>
+                                {mintStatus.isMintingActive ? '🟢 LIVE' : '🔴 ENDED'}
+                              </span>
+                            </div>
+                            {!mintStatus.canMint && !mintStatus.isMintingActive && (
+                              <div className="text-red-400 text-sm">
+                                🚫 Minting has ended
                               </div>
                             )}
                           </div>
@@ -338,12 +351,12 @@ export default function MintPage() {
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-3"></div>
                   Minting NFT...
                 </div>
-              ) : (
-                <div className="flex items-center justify-center">
-                  <span className="mr-2">🚀</span>
-                  {selectedImage ? 'Mint My NFT' : 'Mint Random NFT'}
-                </div>
-              )}
+                      ) : (
+                        <div className="flex items-center justify-center">
+                          <span className="mr-2">🚀</span>
+                          {selectedImage ? 'Mint NFT (100 $LOS)' : 'Mint Random NFT (100 $LOS)'}
+                        </div>
+                      )}
             </button>
             
             {!connected && (

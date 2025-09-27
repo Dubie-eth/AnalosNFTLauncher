@@ -113,46 +113,76 @@ class AnalosBlockchainService {
 // Initialize blockchain service
 const blockchainService = new AnalosBlockchainService();
 
-// Public minting system with $LOS pricing
-class PublicMintService {
+// Open minting system with $LOS pricing and time control
+class OpenMintService {
   private mintedCount: Map<string, number> = new Map();
+  private totalMinted = 0;
   private mintPrice = 100; // 100 $LOS per NFT
-  private maxMintsPerWallet = 10; // Max 10 NFTs per wallet for public mint
+  private isMintingActive = true; // Control minting with this flag
+  private mintStartTime = new Date(); // Track when minting started
+
+  // Control minting - set to false to stop minting
+  setMintingActive(active: boolean) {
+    this.isMintingActive = active;
+    console.log(`🎛️ Minting ${active ? 'ACTIVATED' : 'DEACTIVATED'} at ${new Date().toISOString()}`);
+  }
 
   canMint(walletAddress: string): boolean {
-    const minted = this.mintedCount.get(walletAddress) || 0;
-    return minted < this.maxMintsPerWallet;
+    // Check if minting is active
+    if (!this.isMintingActive) {
+      return false;
+    }
+    
+    // No per-wallet limits - unlimited minting per wallet
+    return true;
   }
 
   recordMint(walletAddress: string) {
     const current = this.mintedCount.get(walletAddress) || 0;
     this.mintedCount.set(walletAddress, current + 1);
-    console.log(`🎨 ${walletAddress} minted NFT #${current + 1} for ${this.mintPrice} $LOS`);
+    this.totalMinted++;
+    console.log(`🎨 ${walletAddress} minted NFT #${current + 1} for ${this.mintPrice} $LOS (Total: ${this.totalMinted})`);
   }
 
   getMintCount(walletAddress: string): number {
     return this.mintedCount.get(walletAddress) || 0;
   }
 
+  getTotalMinted(): number {
+    return this.totalMinted;
+  }
+
   getMintStatus(walletAddress: string) {
     return {
-      isPublicMint: true,
+      isOpenMint: true,
       canMint: this.canMint(walletAddress),
       mintedCount: this.getMintCount(walletAddress),
-      maxMints: this.maxMintsPerWallet,
-      remainingMints: Math.max(0, this.maxMintsPerWallet - this.getMintCount(walletAddress)),
+      totalMinted: this.totalMinted,
       mintPrice: this.mintPrice,
-      currency: '$LOS'
+      currency: '$LOS',
+      isMintingActive: this.isMintingActive,
+      mintStartTime: this.mintStartTime.toISOString()
     };
   }
 
   getMintPrice(): number {
     return this.mintPrice;
   }
+
+  // Admin functions for controlling the mint
+  getMintStats() {
+    return {
+      totalMinted: this.totalMinted,
+      isMintingActive: this.isMintingActive,
+      mintStartTime: this.mintStartTime.toISOString(),
+      mintPrice: this.mintPrice,
+      currency: '$LOS'
+    };
+  }
 }
 
-// Initialize public mint service
-const publicMintService = new PublicMintService();
+// Initialize open mint service
+const openMintService = new OpenMintService();
 
 // Configure multer for file uploads
 const upload = multer({
@@ -298,7 +328,7 @@ app.get('/api/mint-status/:walletAddress', (req, res) => {
       });
     }
 
-    const mintStatus = publicMintService.getMintStatus(walletAddress);
+    const mintStatus = openMintService.getMintStatus(walletAddress);
     res.json({
       success: true,
       data: mintStatus
@@ -307,6 +337,49 @@ app.get('/api/mint-status/:walletAddress', (req, res) => {
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to get mint status'
+    });
+  }
+});
+
+// Admin endpoints for controlling the mint
+app.get('/api/admin/mint-stats', (req, res) => {
+  try {
+    const stats = openMintService.getMintStats();
+    res.json({
+      success: true,
+      data: stats
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to get mint stats'
+    });
+  }
+});
+
+// Toggle minting on/off
+app.post('/api/admin/toggle-minting', (req, res) => {
+  try {
+    const { active } = req.body;
+    if (typeof active !== 'boolean') {
+      return res.status(400).json({
+        success: false,
+        error: 'Active status (true/false) is required'
+      });
+    }
+
+    openMintService.setMintingActive(active);
+    const stats = openMintService.getMintStats();
+    
+    res.json({
+      success: true,
+      message: `Minting ${active ? 'activated' : 'deactivated'}`,
+      data: stats
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to toggle minting'
     });
   }
 });
@@ -393,12 +466,14 @@ app.post('/api/mint', upload.single('image'), async (req, res) => {
               });
             }
 
-            // Check public mint status
-            const mintStatus = publicMintService.getMintStatus(walletAddress);
+            // Check open mint status
+            const mintStatus = openMintService.getMintStatus(walletAddress);
             if (!mintStatus.canMint) {
               return res.status(403).json({
                 success: false,
-                error: `You have reached the maximum mint limit (${mintStatus.maxMints} NFTs per wallet)`,
+                error: mintStatus.isMintingActive 
+                  ? 'Minting is temporarily unavailable'
+                  : 'Minting has ended',
                 mintStatus
               });
             }
@@ -445,10 +520,10 @@ app.post('/api/mint', upload.single('image'), async (req, res) => {
             const metadataUri = `https://arweave.net/${Math.random().toString(36).substr(2, 43)}`;
             const transactionSignature = blockchainResult.signature;
             const explorerUrl = blockchainResult.explorerUrl;
-            const estimatedCost = publicMintService.getMintPrice(); // Use $LOS pricing
+            const estimatedCost = openMintService.getMintPrice(); // Use $LOS pricing
 
-            // Record the mint in public mint system
-            publicMintService.recordMint(walletAddress);
+            // Record the mint in open mint system
+            openMintService.recordMint(walletAddress);
 
             console.log(`NFT minted successfully!`);
             console.log(`Mint Address: ${mintAddress}`);
@@ -475,7 +550,7 @@ app.post('/api/mint', upload.single('image'), async (req, res) => {
           description: nftDescription,
           image: nftImageUrl
         },
-        mintStatus: publicMintService.getMintStatus(walletAddress)
+        mintStatus: openMintService.getMintStatus(walletAddress)
       }
     });
 
