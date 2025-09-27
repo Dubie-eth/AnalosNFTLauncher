@@ -1,14 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
-  trailingSlash: true,
   images: {
-    unoptimized: true,
     domains: [
       'arweave.net',
       'mock-storage.com',
       'via.placeholder.com',
-      'explorer.analos.io'
+      'explorer.analos.io',
+      'picsum.photos'
     ],
     remotePatterns: [
       {
@@ -17,10 +15,6 @@ const nextConfig = {
       },
     ],
   },
-// Remove the entire experimental section or just comment it out
-// experimental: {
-//   appDir: true,
-// },
   webpack: (config, { isServer }) => {
     // Handle canvas for server-side rendering
     if (!isServer) {
