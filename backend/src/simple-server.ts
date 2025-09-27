@@ -191,36 +191,125 @@ app.get('/api/collections/:id', (req, res) => {
   }
 });
 
-// Mint endpoint
-app.post('/api/mint', (req, res) => {
-  const { collectionId, walletAddress, quantity, phase } = req.body;
-  
-  // Basic validation
-  if (!collectionId || !walletAddress || !quantity) {
-    return res.status(400).json({ 
-      error: 'Missing required fields: collectionId, walletAddress, quantity' 
+// Mint endpoint with file upload support
+app.post('/api/mint', upload.single('image'), async (req, res) => {
+  try {
+    // Parse form data fields
+    const name = req.body.name;
+    const description = req.body.description;
+    const imageUrl = req.body.imageUrl;
+    const walletAddress = req.body.walletAddress;
+    const uploadedFile = req.file;
+
+    // Validate required fields
+    if (!name || !walletAddress) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: name and walletAddress are required'
+      });
+    }
+
+    // Use default values if not provided
+    const nftName = name || 'Test Analos NFT';
+    const nftDescription = description || 'A test NFT minted on the Analos blockchain';
+    
+    let nftImageUrl;
+    let imageSize = 0;
+    let imageFormat = 'unknown';
+
+    if (uploadedFile) {
+      // Handle uploaded image
+      imageSize = uploadedFile.size;
+      imageFormat = uploadedFile.mimetype;
+      
+      // For demo purposes, we'll create a data URL from the uploaded file
+      // In production, this would upload to Arweave/IPFS
+      const fileBuffer = await fs.readFile(uploadedFile.path);
+      const base64Image = fileBuffer.toString('base64');
+      nftImageUrl = `data:${imageFormat};base64,${base64Image}`;
+      
+      console.log(`Image uploaded: ${uploadedFile.originalname} (${imageSize} bytes, ${imageFormat})`);
+      
+      // Clean up uploaded file (in production, this would be uploaded to permanent storage)
+      await fs.remove(uploadedFile.path);
+    } else if (imageUrl) {
+      // Use provided image URL
+      nftImageUrl = imageUrl;
+    } else {
+      // Use default placeholder
+      nftImageUrl = 'https://picsum.photos/500/500?random=' + Date.now();
+    }
+
+    console.log(`Minting NFT: ${nftName} for wallet: ${walletAddress}`);
+    console.log(`Image: ${nftImageUrl} (${imageSize} bytes, ${imageFormat})`);
+
+    // Generate mock mint result with cost optimization info
+    const mintAddress = `AnalosNFT_${Math.random().toString(36).substr(2, 9)}`;
+    const metadataUri = `https://arweave.net/${Math.random().toString(36).substr(2, 43)}`;
+    const transactionSignature = `mock_tx_${Math.random().toString(36).substr(2, 43)}`;
+    const explorerUrl = `https://explorer.analos.io/tx/${transactionSignature}`;
+
+    // Calculate estimated costs (mock values for demo)
+    const estimatedCost = calculateMintingCost(imageSize, imageFormat);
+
+    console.log(`NFT minted successfully!`);
+    console.log(`Mint Address: ${mintAddress}`);
+    console.log(`Metadata URI: ${metadataUri}`);
+    console.log(`Transaction: ${explorerUrl}`);
+    console.log(`Estimated Cost: ${estimatedCost} ANALOS`);
+
+    res.json({
+      success: true,
+      data: {
+        mintAddress,
+        metadataUri,
+        transactionSignature,
+        explorerUrl,
+        estimatedCost,
+        imageInfo: {
+          size: imageSize,
+          format: imageFormat,
+          optimized: imageSize <= 5 * 1024 * 1024 // 5MB threshold
+        },
+        nft: {
+          name: nftName,
+          description: nftDescription,
+          image: nftImageUrl
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Mint NFT error:', error);
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to mint NFT'
     });
   }
-  
-  if (quantity < 1 || quantity > 10) {
-    return res.status(400).json({ 
-      error: 'Quantity must be between 1 and 10' 
-    });
-  }
-  
-  // Simulate minting
-  const transactionSignature = `mock_tx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  
-  res.json({
-    success: true,
-    transactionSignature,
-    nftAddresses: Array.from({ length: quantity }, (_, i) => 
-      `mock_nft_${Date.now()}_${i}`
-    ),
-    explorerUrl: `https://explorer.analos.io/tx/${transactionSignature}`,
-    message: `Successfully minted ${quantity} NFT(s) from collection ${collectionId}`
-  });
 });
+
+// Helper function to calculate minting costs based on image size
+function calculateMintingCost(imageSize, imageFormat) {
+  // Base cost for minting on Analos (mock values)
+  const baseCost = 0.001; // 0.001 ANALOS base cost
+  
+  // Storage cost based on image size
+  const storageCostPerMB = 0.0005; // 0.0005 ANALOS per MB
+  const sizeInMB = imageSize / (1024 * 1024);
+  const storageCost = sizeInMB * storageCostPerMB;
+  
+  // Format optimization bonus (WebP and PNG are more efficient)
+  let formatMultiplier = 1.0;
+  if (imageFormat === 'image/webp') {
+    formatMultiplier = 0.8; // 20% discount for WebP
+  } else if (imageFormat === 'image/png') {
+    formatMultiplier = 0.9; // 10% discount for PNG
+  }
+  
+  const totalCost = (baseCost + storageCost) * formatMultiplier;
+  
+  return Math.round(totalCost * 10000) / 10000; // Round to 4 decimal places
+}
 
 // NFT Generator endpoints
 app.get('/api/nft-generator', (req, res) => {
