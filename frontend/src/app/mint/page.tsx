@@ -10,6 +10,7 @@ interface MintResult {
   transactionSignature: string;
   explorerUrl: string;
   estimatedCost: number;
+  currency?: string;
   imageInfo: {
     size: number;
     format: string;
@@ -22,12 +23,14 @@ interface MintResult {
   };
 }
 
-interface WhitelistStatus {
-  isWhitelisted: boolean;
+interface MintStatus {
+  isPublicMint: boolean;
   canMint: boolean;
   mintedCount: number;
   maxMints: number;
   remainingMints: number;
+  mintPrice: number;
+  currency: string;
 }
 
 export default function MintPage() {
@@ -39,37 +42,37 @@ export default function MintPage() {
   const [nftDescription, setNftDescription] = useState('A test NFT minted on the Analos blockchain');
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [whitelistStatus, setWhitelistStatus] = useState<WhitelistStatus | null>(null);
-  const [isCheckingWhitelist, setIsCheckingWhitelist] = useState(false);
+  const [mintStatus, setMintStatus] = useState<MintStatus | null>(null);
+  const [isCheckingMintStatus, setIsCheckingMintStatus] = useState(false);
 
   const generateRandomImage = () => {
     // Use a more reliable image service
     return `https://picsum.photos/500/500?random=${Date.now()}`;
   };
 
-  const checkWhitelistStatus = async (walletAddress: string) => {
-    setIsCheckingWhitelist(true);
+  const checkMintStatus = async (walletAddress: string) => {
+    setIsCheckingMintStatus(true);
     try {
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
-      const response = await fetch(`${backendUrl}/api/whitelist/${walletAddress}`);
+      const response = await fetch(`${backendUrl}/api/mint-status/${walletAddress}`);
       const data = await response.json();
       
       if (data.success) {
-        setWhitelistStatus(data.data);
+        setMintStatus(data.data);
       } else {
-        console.error('Failed to check whitelist status:', data.error);
+        console.error('Failed to check mint status:', data.error);
       }
     } catch (error) {
-      console.error('Error checking whitelist status:', error);
+      console.error('Error checking mint status:', error);
     } finally {
-      setIsCheckingWhitelist(false);
+      setIsCheckingMintStatus(false);
     }
   };
 
-  // Check whitelist status when wallet connects
+  // Check mint status when wallet connects
   React.useEffect(() => {
     if (connected && publicKey) {
-      checkWhitelistStatus(publicKey.toString());
+      checkMintStatus(publicKey.toString());
     }
   }, [connected, publicKey]);
 
@@ -150,9 +153,9 @@ export default function MintPage() {
 
               setMintResult(data.data);
               
-              // Refresh whitelist status after successful minting
+              // Refresh mint status after successful minting
               if (publicKey) {
-                checkWhitelistStatus(publicKey.toString());
+                checkMintStatus(publicKey.toString());
               }
               
               // Clear the form after successful minting
@@ -193,33 +196,31 @@ export default function MintPage() {
                       <WalletMultiButton className="!bg-purple-600 hover:!bg-purple-700 !rounded-lg" />
                     </div>
                     
-                    {/* Whitelist Status */}
+                    {/* Public Mint Status */}
                     {connected && publicKey && (
                       <div className="mt-4 p-4 bg-white/5 rounded-lg">
-                        {isCheckingWhitelist ? (
+                        {isCheckingMintStatus ? (
                           <div className="flex items-center text-gray-300">
                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                            Checking whitelist status...
+                            Checking mint status...
                           </div>
-                        ) : whitelistStatus ? (
+                        ) : mintStatus ? (
                           <div className="space-y-2">
                             <div className="flex items-center justify-between">
-                              <span className="text-gray-300">Whitelist Status:</span>
-                              <span className={`font-semibold ${whitelistStatus.isWhitelisted ? 'text-green-400' : 'text-red-400'}`}>
-                                {whitelistStatus.isWhitelisted ? '✅ Whitelisted' : '❌ Not Whitelisted'}
+                              <span className="text-gray-300">Mint Price:</span>
+                              <span className="text-green-400 font-semibold">
+                                {mintStatus.mintPrice} {mintStatus.currency}
                               </span>
                             </div>
-                            {whitelistStatus.isWhitelisted && (
-                              <div className="flex items-center justify-between">
-                                <span className="text-gray-300">Mints Remaining:</span>
-                                <span className="text-blue-400 font-semibold">
-                                  {whitelistStatus.remainingMints} / {whitelistStatus.maxMints}
-                                </span>
-                              </div>
-                            )}
-                            {!whitelistStatus.canMint && whitelistStatus.isWhitelisted && (
+                            <div className="flex items-center justify-between">
+                              <span className="text-gray-300">Mints Remaining:</span>
+                              <span className="text-blue-400 font-semibold">
+                                {mintStatus.remainingMints} / {mintStatus.maxMints}
+                              </span>
+                            </div>
+                            {!mintStatus.canMint && (
                               <div className="text-yellow-400 text-sm">
-                                ⚠️ You've reached the maximum mint limit for this collection
+                                ⚠️ You've reached the maximum mint limit ({mintStatus.maxMints} NFTs per wallet)
                               </div>
                             )}
                           </div>
@@ -325,9 +326,9 @@ export default function MintPage() {
           <div className="text-center mb-6">
                     <button
                       onClick={handleMint}
-                      disabled={!connected || isMinting || !nftName.trim() || (whitelistStatus && !whitelistStatus.canMint)}
+                      disabled={!connected || isMinting || !nftName.trim() || (mintStatus && !mintStatus.canMint)}
                       className={`px-12 py-4 rounded-xl font-bold text-xl transition-all duration-200 transform ${
-                        connected && !isMinting && nftName.trim() && (!whitelistStatus || whitelistStatus.canMint)
+                        connected && !isMinting && nftName.trim() && (!mintStatus || mintStatus.canMint)
                           ? 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl hover:scale-105'
                           : 'bg-gray-600 text-gray-400 cursor-not-allowed'
                       }`}
@@ -391,12 +392,12 @@ export default function MintPage() {
                   </a>
                 </div>
 
-                <div>
-                  <span className="text-gray-300">Estimated Cost:</span>
-                  <span className="text-green-400 ml-2 font-semibold">
-                    {mintResult.estimatedCost} ANALOS
-                  </span>
-                </div>
+                        <div>
+                          <span className="text-gray-300">Mint Cost:</span>
+                          <span className="text-green-400 ml-2 font-semibold">
+                            {mintResult.estimatedCost} {mintResult.currency || '$LOS'}
+                          </span>
+                        </div>
 
                 <div>
                   <span className="text-gray-300">Image Info:</span>
