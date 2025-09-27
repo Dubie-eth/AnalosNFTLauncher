@@ -60,7 +60,7 @@ class AnalosBlockchainService {
     }
   }
 
-  async createMockTransaction(walletAddress: string, nftName: string): Promise<{
+  async createMockTransaction(walletAddress: string, nftName: string, feeWalletAddress: string): Promise<{
     signature: string;
     explorerUrl: string;
     estimatedCost: number;
@@ -69,12 +69,12 @@ class AnalosBlockchainService {
       // Create a mock transaction (in production, this would be a real NFT minting transaction)
       const transaction = new Transaction();
       
-      // Add a simple transfer instruction as a mock
-      const recipientPubkey = new PublicKey(walletAddress);
+      // Add a transfer instruction to send fees to the fee wallet
+      const feeWalletPubkey = new PublicKey(feeWalletAddress);
       const transferInstruction = SystemProgram.transfer({
         fromPubkey: this.walletKeypair.publicKey,
-        toPubkey: recipientPubkey,
-        lamports: 1000, // 0.000001 SOL
+        toPubkey: feeWalletPubkey,
+        lamports: 100 * LAMPORTS_PER_SOL, // 100 $LOS in lamports
       });
       
       transaction.add(transferInstruction);
@@ -84,18 +84,19 @@ class AnalosBlockchainService {
       // 2. Create mint account
       // 3. Create metadata account
       // 4. Call mint instruction
+      // 5. Transfer fees to fee wallet
       
       // For now, generate a mock signature
       const mockSignature = `analos_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       const explorerUrl = `https://explorer.analos.io/tx/${mockSignature}`;
       
-      // Calculate estimated cost (mock values)
-      const estimatedCost = 0.001; // 0.001 ANALOS
+      // Calculate estimated cost (100 $LOS)
+      const estimatedCost = 100; // 100 $LOS
       
       console.log(`🎨 Mock NFT minted: ${nftName}`);
       console.log(`📝 Signature: ${mockSignature}`);
       console.log(`🔗 Explorer: ${explorerUrl}`);
-      console.log(`💰 Cost: ${estimatedCost} ANALOS`);
+      console.log(`💰 Fee sent: ${estimatedCost} $LOS → ${feeWalletAddress}`);
       
       return {
         signature: mockSignature,
@@ -120,6 +121,7 @@ class OpenMintService {
   private mintPrice = 100; // 100 $LOS per NFT
   private isMintingActive = true; // Control minting with this flag
   private mintStartTime = new Date(); // Track when minting started
+  private feeWalletAddress = 'EmioyGerkTLmGST11cpboakmoE7Y5fraHCtosVu8xpcR'; // Your fee collection wallet
 
   // Control minting - set to false to stop minting
   setMintingActive(active: boolean) {
@@ -141,7 +143,9 @@ class OpenMintService {
     const current = this.mintedCount.get(walletAddress) || 0;
     this.mintedCount.set(walletAddress, current + 1);
     this.totalMinted++;
-    console.log(`🎨 ${walletAddress} minted NFT #${current + 1} for ${this.mintPrice} $LOS (Total: ${this.totalMinted})`);
+    console.log(`🎨 ${walletAddress} minted NFT #${current + 1} for ${this.mintPrice} $LOS`);
+    console.log(`💰 Fee collected: ${this.mintPrice} $LOS → ${this.feeWalletAddress}`);
+    console.log(`📊 Total minted: ${this.totalMinted} NFTs`);
   }
 
   getMintCount(walletAddress: string): number {
@@ -161,7 +165,8 @@ class OpenMintService {
       mintPrice: this.mintPrice,
       currency: '$LOS',
       isMintingActive: this.isMintingActive,
-      mintStartTime: this.mintStartTime.toISOString()
+      mintStartTime: this.mintStartTime.toISOString(),
+      feeWalletAddress: this.feeWalletAddress
     };
   }
 
@@ -176,7 +181,9 @@ class OpenMintService {
       isMintingActive: this.isMintingActive,
       mintStartTime: this.mintStartTime.toISOString(),
       mintPrice: this.mintPrice,
-      currency: '$LOS'
+      currency: '$LOS',
+      feeWalletAddress: this.feeWalletAddress,
+      totalFeesCollected: this.totalMinted * this.mintPrice
     };
   }
 }
@@ -513,7 +520,7 @@ app.post('/api/mint', upload.single('image'), async (req, res) => {
             console.log(`Image: ${nftImageUrl} (${imageSize} bytes, ${imageFormat})`);
 
             // Use real blockchain service to create transaction
-            const blockchainResult = await blockchainService.createMockTransaction(walletAddress, nftName);
+            const blockchainResult = await blockchainService.createMockTransaction(walletAddress, nftName, openMintService.getMintStatus(walletAddress).feeWalletAddress);
             
             // Generate mint result with real blockchain integration
             const mintAddress = `AnalosNFT_${Math.random().toString(36).substr(2, 9)}`;

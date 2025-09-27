@@ -32,6 +32,7 @@ interface MintStatus {
   currency: string;
   isMintingActive: boolean;
   mintStartTime: string;
+  feeWalletAddress: string;
 }
 
 export default function MintPage() {
@@ -229,6 +230,12 @@ export default function MintPage() {
                               <span className="text-gray-300">Status:</span>
                               <span className={`font-semibold ${mintStatus.isMintingActive ? 'text-green-400' : 'text-red-400'}`}>
                                 {mintStatus.isMintingActive ? '🟢 LIVE' : '🔴 ENDED'}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-gray-300">Fee Wallet:</span>
+                              <span className="text-yellow-400 font-mono text-xs">
+                                {mintStatus.feeWalletAddress.slice(0, 8)}...{mintStatus.feeWalletAddress.slice(-8)}
                               </span>
                             </div>
                             {!mintStatus.canMint && !mintStatus.isMintingActive && (
@@ -438,14 +445,15 @@ export default function MintPage() {
             </div>
           )}
 
-          {/* Network Info */}
-          <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-4 mt-6">
-            <div className="text-center text-gray-400 text-sm">
-              <p>🌐 Network: Analos</p>
-              <p>🔗 RPC: https://rpc.analos.io</p>
-              <p>🔍 Explorer: https://explorer.analos.io</p>
-            </div>
-          </div>
+                  {/* Network Info */}
+                  <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-4 mt-6">
+                    <div className="text-center text-gray-400 text-sm space-y-1">
+                      <p>🌐 Network: Analos</p>
+                      <p>🔗 RPC: https://rpc.analos.io</p>
+                      <p>🔍 Explorer: https://explorer.analos.io</p>
+                      <p className="text-yellow-400">💰 Fees: 100 $LOS → EmioyGerk...xpcR</p>
+                    </div>
+                  </div>
         </div>
       </div>
     </div>
