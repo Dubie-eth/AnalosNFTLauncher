@@ -24,3 +24,6 @@ mpl-token-auth-rules = "0.1.0"
 solana-program = "~1.17.0"
 spl-token = "~4.0.0"
 spl-associated-token-account = "~2.2.0"
+
+[profile.release]
+overflow-checks = true

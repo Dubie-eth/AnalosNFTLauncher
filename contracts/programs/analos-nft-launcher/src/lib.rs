@@ -5,7 +5,7 @@ use mpl_token_metadata::{
     types::{Creator, Collection},
 };
 
-declare_id!("NFTLauncher1111111111111111111111111111111");
+declare_id!("11111111111111111111111111111112");
 
 #[program]
 pub mod analos_nft_launcher {
