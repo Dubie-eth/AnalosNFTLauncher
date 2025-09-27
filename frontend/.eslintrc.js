@@ -7,6 +7,7 @@ module.exports = {
   },
   extends: [
     'eslint:recommended',
+    'next/core-web-vitals',
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
@@ -25,6 +26,8 @@ module.exports = {
     'no-undef': 'off',
     'no-unused-vars': 'off',
     '@typescript-eslint/no-unused-vars': 'off',
+    'react/no-unescaped-entities': 'off',
+    '@next/next/no-img-element': 'off',
   },
   ignorePatterns: [
     'node_modules/',
