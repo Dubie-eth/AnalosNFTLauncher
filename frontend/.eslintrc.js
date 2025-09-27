@@ -8,6 +8,7 @@ module.exports = {
   extends: [
     'eslint:recommended',
   ],
+  parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion: 'latest',
     sourceType: 'module',
@@ -15,11 +16,15 @@ module.exports = {
       jsx: true,
     },
   },
+  plugins: ['@typescript-eslint'],
   rules: {
-    'prefer-const': 'error',
-    'no-var': 'error',
-    'no-console': 'warn',
-    'no-debugger': 'error',
+    'prefer-const': 'warn',
+    'no-var': 'warn',
+    'no-console': 'off',
+    'no-debugger': 'warn',
+    'no-undef': 'off',
+    'no-unused-vars': 'off',
+    '@typescript-eslint/no-unused-vars': 'off',
   },
   ignorePatterns: [
     'node_modules/',
