@@ -201,7 +201,7 @@ export default function MintPage() {
                                 {mintStatus.feeWalletAddress.slice(0, 8)}...{mintStatus.feeWalletAddress.slice(-8)}
                               </span>
                             </div>
-                            {!mintStatus.canMint && !mintStatus.isMintingActive && (
+                            {mintStatus && !mintStatus.canMint && !mintStatus.isMintingActive && (
                               <div className="text-red-400 text-sm">
                                 🚫 Minting has ended
                               </div>
