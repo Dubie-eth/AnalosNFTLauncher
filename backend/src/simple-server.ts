@@ -506,7 +506,7 @@ app.post('/api/admin/deploy-collection', (req, res) => {
     };
 
     // Generate mint page URL
-    const mintPageUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://analos-nft-launcher-uz4a-dlfqnwmta-dubie-eths-projects.vercel.app'}/mint/${collectionId}`;
+    const mintPageUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://analos-nft-launcher-uz4a-dlfqnwmta-dubie-eths-projects.vercel.app'}/mint/collection/${collectionId}`;
 
     // Store collection data for retrieval
     collections.set(collectionId, collectionData);
