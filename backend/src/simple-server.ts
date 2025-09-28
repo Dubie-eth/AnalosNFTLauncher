@@ -436,7 +436,7 @@ app.post('/api/admin/deploy-collection', (req, res) => {
     }
 
     // Generate unique collection ID
-    const collectionId = `collection_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const collectionId = `collection-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     
     // Create collection data
     const collectionData = {
