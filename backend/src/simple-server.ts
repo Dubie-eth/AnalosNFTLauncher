@@ -439,11 +439,11 @@ app.post('/api/admin/deploy-collection', (req, res) => {
     // In real implementation, this would be the actual collection mint address from blockchain
     const timestamp = Date.now();
     const randomSuffix = Math.random().toString(36).substr(2, 9);
-    const collectionId = `AnalosCol-${timestamp}-${randomSuffix}`;
+    const collectionId = `AnalosCol${timestamp}${randomSuffix}`;
     
     // Simulate blockchain collection deployment
-    const collectionMintAddress = `AnalosMint_${timestamp}_${randomSuffix}`;
-    const collectionMetadataUri = `https://arweave.net/collection_${timestamp}_${randomSuffix}`;
+    const collectionMintAddress = `AnalosMint${timestamp}${randomSuffix}`;
+    const collectionMetadataUri = `https://arweave.net/collection${timestamp}${randomSuffix}`;
     
     // Create collection data with blockchain information
     const collectionData = {
