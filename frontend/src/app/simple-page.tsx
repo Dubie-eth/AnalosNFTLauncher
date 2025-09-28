@@ -39,7 +39,8 @@ export default function SimplePage() {
 
       console.log('Uploading file:', selectedFile.name, 'Size:', selectedFile.size);
       
-      const response = await fetch('http://localhost:3001/api/collections/upload', {
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+      const response = await fetch(`${backendUrl}/api/collections/upload`, {
         method: 'POST',
         body: formData,
       });

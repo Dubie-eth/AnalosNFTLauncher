@@ -119,7 +119,8 @@ export default function PreviewPage() {
     setLaunchResult(null);
     
     try {
-      const response = await fetch('http://localhost:3001/api/collections/launch', {
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+      const response = await fetch(`${backendUrl}/api/collections/launch`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
