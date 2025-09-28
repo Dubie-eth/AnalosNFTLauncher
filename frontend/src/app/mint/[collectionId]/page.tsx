@@ -47,6 +47,15 @@ interface CollectionData {
   adminWallet: string;
   deployedAt: string;
   isActive: boolean;
+  collectionMintAddress?: string;
+  collectionMetadataUri?: string;
+  blockchainInfo?: {
+    network: string;
+    rpcUrl: string;
+    explorerUrl: string;
+    deployed: boolean;
+    verified: boolean;
+  };
 }
 
 export default function CollectionMintPage() {
