@@ -222,6 +222,9 @@ class OpenMintService {
 // Initialize open mint service
 const openMintService = new OpenMintService();
 
+// Simple in-memory collection storage (in production, use a database)
+const collections = new Map<string, any>();
+
 // Configure multer for file uploads
 const upload = multer({
   dest: 'uploads/',
@@ -422,6 +425,40 @@ app.post('/api/admin/toggle-minting', (req, res) => {
   }
 });
 
+// Get collection data endpoint
+app.get('/api/collections/:collectionId', (req, res) => {
+  try {
+    const { collectionId } = req.params;
+    
+    if (!collectionId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Collection ID is required'
+      });
+    }
+
+    const collection = collections.get(collectionId);
+    
+    if (!collection) {
+      return res.status(404).json({
+        success: false,
+        error: 'Collection not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: collection
+    });
+  } catch (error) {
+    console.error('Get collection error:', error);
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to get collection'
+    });
+  }
+});
+
 // Deploy collection endpoint
 app.post('/api/admin/deploy-collection', (req, res) => {
   try {
@@ -471,10 +508,14 @@ app.post('/api/admin/deploy-collection', (req, res) => {
     // Generate mint page URL
     const mintPageUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://analos-nft-launcher-uz4a-dlfqnwmta-dubie-eths-projects.vercel.app'}/mint/${collectionId}`;
 
+    // Store collection data for retrieval
+    collections.set(collectionId, collectionData);
+
     console.log(`🚀 Collection deployed: ${collectionData.name}`);
     console.log(`📝 Collection ID: ${collectionId}`);
     console.log(`🔗 Mint Page: ${mintPageUrl}`);
     console.log(`👤 Admin Wallet: ${adminWallet}`);
+    console.log(`💾 Collections stored: ${collections.size}`);
 
     res.json({
       success: true,

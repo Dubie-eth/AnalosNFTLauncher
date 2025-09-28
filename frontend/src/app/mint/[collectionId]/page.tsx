@@ -88,28 +88,33 @@ export default function CollectionMintPage() {
     return mintStatus.canMint;
   };
 
-  // Load collection data (mock for now)
+  // Load collection data from backend
   useEffect(() => {
     const loadCollectionData = async () => {
       setIsLoadingCollection(true);
       try {
-        // Mock collection data - in real implementation, fetch from backend
-        const mockCollectionData: CollectionData = {
-          id: collectionId,
-          name: 'Analos Collection',
-          description: 'A unique NFT collection on the Analos blockchain',
-          imageUrl: generateRandomImage(),
-          totalSupply: 1000,
-          mintPrice: 100,
-          currency: '$LOS',
-          adminWallet: 'EmioyGerkTLmGST11cpboakmoE7Y5fraHCtosVu8xpcR',
-          deployedAt: new Date().toISOString(),
-          isActive: true
-        };
-        setCollectionData(mockCollectionData);
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+        const response = await fetch(`${backendUrl}/api/collections/${collectionId}`);
+        
+        if (!response.ok) {
+          if (response.status === 404) {
+            setError('Collection not found. It may have been deleted or the ID is incorrect.');
+          } else {
+            throw new Error(`Failed to load collection: ${response.status}`);
+          }
+          return;
+        }
+
+        const data = await response.json();
+        
+        if (data.success) {
+          setCollectionData(data.data);
+        } else {
+          setError(data.error || 'Failed to load collection data');
+        }
       } catch (error) {
         console.error('Error loading collection:', error);
-        setError('Failed to load collection data');
+        setError('Failed to load collection data. Please check your connection.');
       } finally {
         setIsLoadingCollection(false);
       }
