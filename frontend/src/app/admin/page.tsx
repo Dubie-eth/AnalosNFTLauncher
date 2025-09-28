@@ -213,7 +213,7 @@ export default function AdminPage() {
                       alt="Collection preview"
                       className="w-full h-48 object-cover rounded-lg"
                       onError={(e) => {
-                        e.currentTarget.src = 'https://via.placeholder.com/500x500?text=Invalid+Image';
+                        e.currentTarget.src = 'https://picsum.photos/500/500?random=error';
                       }}
                     />
                   </div>
