@@ -222,8 +222,39 @@ class OpenMintService {
 // Initialize open mint service
 const openMintService = new OpenMintService();
 
-// Simple in-memory collection storage (in production, use a database)
+// Persistent collection storage
 const collections = new Map<string, any>();
+const COLLECTIONS_FILE = 'collections.json';
+
+// Load collections from file on startup
+const loadCollections = () => {
+  try {
+    if (fs.existsSync(COLLECTIONS_FILE)) {
+      const data = fs.readFileSync(COLLECTIONS_FILE, 'utf8');
+      const collectionsData = JSON.parse(data);
+      Object.entries(collectionsData).forEach(([id, collection]) => {
+        collections.set(id, collection);
+      });
+      console.log(`📁 Loaded ${collections.size} collections from storage`);
+    }
+  } catch (error) {
+    console.error('Error loading collections:', error);
+  }
+};
+
+// Save collections to file
+const saveCollections = () => {
+  try {
+    const collectionsData = Object.fromEntries(collections);
+    fs.writeFileSync(COLLECTIONS_FILE, JSON.stringify(collectionsData, null, 2));
+    console.log(`💾 Saved ${collections.size} collections to storage`);
+  } catch (error) {
+    console.error('Error saving collections:', error);
+  }
+};
+
+// Load collections on startup
+loadCollections();
 
 // Configure multer for file uploads
 const upload = multer({
@@ -505,11 +536,22 @@ app.post('/api/admin/deploy-collection', (req, res) => {
       }
     };
 
-    // Generate mint page URL with query parameter
-    const mintPageUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://analos-nft-launcher-uz4a-dlfqnwmta-dubie-eths-projects.vercel.app'}/mint?id=${collectionId}`;
+    // Generate URL-friendly collection name
+    const urlFriendlyName = name
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-') // Replace multiple hyphens with single
+      .trim();
+
+    // Generate mint page URL with collection name and ID
+    const mintPageUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://analos-nft-launcher-uz4a-dlfqnwmta-dubie-eths-projects.vercel.app'}/mint/${urlFriendlyName}?id=${collectionId}`;
 
     // Store collection data for retrieval
     collections.set(collectionId, collectionData);
+    
+    // Save to persistent storage
+    saveCollections();
 
     console.log(`🚀 Collection deployed: ${collectionData.name}`);
     console.log(`📝 Collection ID: ${collectionId}`);
