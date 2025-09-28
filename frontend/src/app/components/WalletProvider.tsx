@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
-import { SolflareWalletAdapter } from '@solana/wallet-adapter-wallets';
+import { SolflareWalletAdapter, BackpackWalletAdapter } from '@solana/wallet-adapter-wallets';
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import { clusterApiUrl } from '@solana/web3.js';
 
@@ -18,6 +18,7 @@ export function WalletContextProvider({ children }: { children: React.ReactNode 
   const wallets = useMemo(
     () => [
       new SolflareWalletAdapter(),
+      new BackpackWalletAdapter(),
     ],
     []
   );
