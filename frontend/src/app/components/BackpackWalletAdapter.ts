@@ -1,4 +1,4 @@
-import { WalletAdapter, WalletAdapterNetwork } from '@solana/wallet-adapter-base';
+import { WalletAdapter, WalletAdapterNetwork, WalletName } from '@solana/wallet-adapter-base';
 import { PublicKey, Transaction } from '@solana/web3.js';
 
 export interface BackpackWallet {
@@ -41,8 +41,8 @@ export class BackpackWalletAdapter implements WalletAdapter {
     return typeof window !== 'undefined' && !!window.backpack;
   }
 
-  get name(): string {
-    return 'Backpack';
+  get name(): WalletName {
+    return 'Backpack' as WalletName;
   }
 
   get url(): string {
