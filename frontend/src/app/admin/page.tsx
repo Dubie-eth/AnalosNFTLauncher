@@ -1,5 +1,6 @@
 'use client';
 
+// Admin Dashboard for NFT Collection Deployment
 import React, { useState } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
