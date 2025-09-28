@@ -50,6 +50,17 @@ export default function MintPage() {
     return `https://picsum.photos/500/500?random=${Date.now()}`;
   };
 
+  // Helper function to safely check if minting is allowed
+  const canUserMint = (): boolean => {
+    if (!connected || isMinting || !nftName.trim()) {
+      return false;
+    }
+    if (mintStatus === null) {
+      return true; // Default to allowing mint if status is not loaded yet
+    }
+    return mintStatus.canMint;
+  };
+
   // Fixed collection image - no user uploads
   const collectionImage = generateRandomImage();
 
@@ -281,9 +292,9 @@ export default function MintPage() {
           <div className="text-center mb-6">
                     <button
                       onClick={handleMint}
-                      disabled={!connected || isMinting || !nftName.trim() || (mintStatus ? !mintStatus.canMint : false)}
+                      disabled={!canUserMint()}
                       className={`px-12 py-4 rounded-xl font-bold text-xl transition-all duration-200 transform ${
-                        connected && !isMinting && nftName.trim() && (mintStatus ? mintStatus.canMint : true)
+                        canUserMint()
                           ? 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl hover:scale-105'
                           : 'bg-gray-600 text-gray-400 cursor-not-allowed'
                       }`}
